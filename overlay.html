@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heroes Share Live</title>
+	<link href="styles.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="overlay.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="jquery-ui.min.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="jquery-ui.structure.min.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="jquery-ui.theme.min.css" rel="stylesheet" type="text/css" media="all" />
+</head>
+<body>	
+
+	<div id="wrapper">
+		<h1 id="summary">Loading</h1>
+	
+		<div id="main" class="tucked">
+			<div id="clickbar" onclick="$('#main').toggleClass('tucked');">
+				<img id="logo" src="inverse.png" alt="logo" />
+			</div>
+			<div id="tuck" class="ui-icon ui-icon-closethick" onclick="$('#main').addClass('tucked');"></div>
+			
+			<table class="panel table-stats" id="table-stats1" onclick="$('.table-stats').hide(); $('#table-stats2').show();"></table>
+			<table class="panel table-stats" id="table-stats2" onclick="$('.table-stats').hide(); $('#table-stats3').show();"></table>
+			<table class="panel table-stats" id="table-stats3" onclick="$('.table-stats').hide(); $('#table-stats1').show();"></table>
+			<table class="panel" id="table-talents"></table>
+			<table class="panel" id="table-heroes"></table>
+			
+			<div id="controls">
+				<span onclick="$('.panel').hide(); $('#table-stats1').show();">Stats</span>
+				<span onclick="$('.panel').hide(); $('#table-talents').show();">Talents</span>
+				<span onclick="$('.panel').hide(); $('#table-heroes').show();">Heroes</span>
+			</div>
+		</div>
+	</div>
+	
+	<script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+	<script src="jquery-3.3.1.min.js"></script>
+	<script src="jquery-ui.min.js"></script>
+		
+	<script src="helper.js" type="text/javascript"></script>
+	<script src="overlay.js" type="text/javascript"></script>
+	
+</body>
+</html>

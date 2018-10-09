@@ -182,7 +182,7 @@
 	display: none;
 }
 	#table-heroes .icon-hero {
-		max-height: 6vh;
+		max-height: 10vh;
 		cursor: pointer;
 	}
 
@@ -205,7 +205,7 @@
 	}
 	
 	.hero .icon-hero {
-		max-height: 6vh;
+		max-height: 10vh;
 		float: right;
 	}
 	
@@ -214,7 +214,7 @@
 }
 
 	.table-abilities .icon-ability {
-		max-height: 4vh;
+		max-height: 6vh;
 		cursor: pointer;
 	}
 	

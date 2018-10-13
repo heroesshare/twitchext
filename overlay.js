@@ -10,7 +10,6 @@ var twitch = window.Twitch.ext;
 
 twitch.onContext(function(context) {
 	twitch.rig.log(context);
-	console.log(context);
 });
 
 twitch.onAuthorized(function(auth) {
@@ -51,7 +50,6 @@ function cacheGameData(data) {
 	} else {
 		disappear();
 		twitch.rig.log('Failed to load game data');
-		console.log('Failed to load game data');
 	}
 }
 
@@ -65,7 +63,6 @@ function updateTables(data) {
 	// check for errors
 	if (data.status == "error") {
 		twitch.rig.log('Error from application: ' + data.message);
-		console.log('Error from application: ' + data.message);
 		disappear();
 		return;
 	}
@@ -73,7 +70,6 @@ function updateTables(data) {
 	// make sure there is a game
 	if (typeof data.id == 'undefined' || data.id == null) {
 		twitch.rig.log('No game active, hiding');
-		console.log('No game active, hiding');
 		disappear();
 		return;
 	}
@@ -81,54 +77,83 @@ function updateTables(data) {
 	$('#summary').html(data.summary);
 	$('#wrapper').show();
 	
-	// check for players endpoint (e.g. basic vs premium)
-	if (typeof data.players == 'undefined' || data.players == null) {
-		updateHeroes(data);
-	} else {		
+	// figure out what to display	
+	// check for players endpoint
+	if (typeof data.players !== 'undefined' && data.players !== null) {
+		playersFlag = true;
+	} else {
+		playersFlag = false;
+	}
+	
+	// check for heroes endpoint
+	if (typeof data.heroes !== 'undefined' && data.heroes !== null) {
+		heroesFlag = true;
+	} else {
+		heroesFlag = false;
+	}
+
+	// if both endpoints present display all panels and controls
+	if (playersFlag && heroesFlag) {
+		updateStats(data);
 		updateTalents(data);
 		updateHeroes(data);
-		updateStats(data);
+		
+		$("#controls").show();
+		$("#main").show();
 	}
+	
+	// if only one endpoint, display the corresponding panel and hide others
+	else if (playerFlag) {
+		$("#controls").hide();
+		$('.panel').hide();
+		$('#table-stats').show();
+		
+		$("#main").show();
+	}
+	
+	// if only one endpoint, display the corresponding panel and hide others
+	else if (heroFlag) {
+		$("#controls").hide();
+		$('.panel').hide();
+		$('#table-heroes').show();
+		
+		$("#main").show();
+	}
+	
+	// no endpoints, hide main (leave wrapper for summary)
+	else {
+		$("#main").hide();		
+	}
+	
 }
 
 function updateStats(data) {
 	var tableLength = 8;
 
 	twitch.rig.log('Updating stats table');
-	$(".table-stats").empty();	
+	$("#table-stats").empty();	
 	
 	tr = "<tr class='row-header'>";
-	tr += "<th></th><th></th><th>Stats by HeroesProfile.com</th>";
-	
-	tr1 = tr;
-	tr2 = tr;
-	tr3 = tr;
-	
+	tr += "<th colspan='3'>Stats by HeroesProfile.com</th>";
+		
 	tally = 0;
 	$.each(gameData.stats, function (statKey, statName) {
-		th = "<th class='column-stat' title='"+statName+"'>"+statKey+"</th>";
+		if (tally < 6) {
+			tr += "<th class='column-stat'>"+statName+"</th>";
+		} else if (tally == 6) {
+			tr += "<th>";
+			tr += "<select onchange=\"$('.stat-extra').hide(); $('.stat-extra-'+this.value).show();\" >";
+			tr += "<option value='-1'>Hero & mode average:</option>";
+		}
 		
-		// add to one or all tables
-		if (tally<2) {
-			tr1 += th;
-			tr2 += th;
-			tr3 += th;
-		} else if (tally > tableLength*2) {
-			tr3 += th;
-		} else if (tally > tableLength) {
-			tr2 += th;
-		} else {
-			tr1 += th;
+		if (tally >= 6) {
+			tr += "<option value='"+tally+"'>"+statName+"</option>";
 		}
 		
 		tally++;
 	});
-	tr1 += "</tr>";
-	tr2 += "</tr>";
-	tr3 += "</tr>";
-	$('#table-stats1').append(tr1);
-	$('#table-stats2').append(tr2);
-	$('#table-stats3').append(tr3);
+	tr += "</select></tr>";
+	$('#table-stats').append(tr);
 
 	// add a row for each player
 	$.each(data.players, function (i, player) {
@@ -154,7 +179,7 @@ function updateStats(data) {
 			hero = gameData.heroes[player.heroId];
 			heroIcon = iconify("hero", hero.name, hero.icon);
 
-			tr += "<td class='hero-column' onclick='showHero("+player.heroId+");'>";
+			tr += "<td class='column-hero' onclick='showHero("+player.heroId+");'>";
 			// hero level
 			if (typeof player.heroLevel !== 'undefined' && player.heroLevel !== null) {
 				tr += "<span class='hero-level'>"+player.heroLevel+"</span>";
@@ -176,59 +201,27 @@ function updateStats(data) {
 			// player name
 			tr += "<td><span class='player-name'>"+player.shortname+"</td>";
 		}
-		
-		tr1 = tr;
-		tr2 = tr;
-		tr3 = tr;
-				
+						
 		// track how many columns
 		tally = 0;
 		$.each(player.stats, function (stat, val) {
-
-			if (val==null) {
-				td = "<td class='stat-column'></td>";
-			} else {
-				td = "<td class='stat-column'>"+val+"</td>";
+			
+			if (tally < 6) {
+				tr += "<td class='column-stat'>"+val+"</td>";
+			} else if (tally == 6) {
+				tr += "<td class='column-stat'>";
 			}
 			
-			// add to one or both tables
-			if (tally<2) {
-				tr1 += td;
-				tr2 += td;
-				tr3 += td;
-			} else if (tally > tableLength*2) {
-				tr3 += td;
-			} else if (tally > tableLength) {
-				tr2 += td;
-			} else {
-				tr1 += td;
+			if (tally >=6) {
+				tr += "<span class='stat-extra stat-extra-"+tally+"'>"+val+"</span>";
 			}
 			
 			tally++;
 		});
-		
-		// fill the rest of the columns
-		for (j = tally; j<Object.keys(gameData.stats).length; j++) {
-			td = "<td class='stat-column'></td>";
-			
-			// add to the correct table
-			if (j > tableLength*2) {
-				tr3 += td;
-			} else if (j > tableLength) {
-				tr2 += td;
-			} else {
-				tr1 += td;
-			}
-		}
-		
-		// close rows on all tables
-		tr1 += "</tr>";
-		tr2 += "</tr>";
-		tr3 += "</tr>";
-		// add to tables
-		$('#table-stats1').append(tr1);
-		$('#table-stats2').append(tr2);
-		$('#table-stats3').append(tr3);
+	
+		// close column and row and add to table
+		tr += "</td></tr>";
+		$('#table-stats').append(tr);
 	});
 	
 }
@@ -269,7 +262,7 @@ function updateTalents(data) {
 			hero = gameData.heroes[player.heroId];
 			heroIcon = iconify("hero", hero.name, hero.icon);
 
-			tr += "<td class='hero-column' onclick='showHero("+player.heroId+");'>";
+			tr += "<td class='column-hero' onclick='showHero("+player.heroId+");'>";
 			// hero level
 			if (typeof player.heroLevel !== 'undefined' && player.heroLevel !== null) {
 				tr += "<span class='hero-level'>"+player.heroLevel+"</span>";
@@ -298,7 +291,12 @@ function updateTalents(data) {
 			talent = gameData.talents[talentId];
 			
 			// talent icon
-			talentIcon = iconify("talent", talent.name, talent.icon, talent.name+"  "+talent.description);
+			tooltip = talent.name.toUpperCase()+": ";
+			if (talent.cooldown != null)
+				tooltip += "Cooldown: "+talent.cooldown+"s. ";
+			tooltip += talent.description;
+			
+			talentIcon = iconify("talent", talent.name, talent.icon, tooltip);
 			tr += "<td class='column-talent'>"+talentIcon+"</td>";
 				
 			tally++;
@@ -369,7 +367,7 @@ function updateHeroes(data) {
 		section += "<div class='wrapper-abilities'>";
 		section += "<h3>Abilities</h3>";
 		section += "<table class='table-abilities'>";
-
+		section += "<tr><th>basic</th>"
 		var type = "";
 		var tally = 0;
 		$.each(hero.abilities, function (i, abilityId) {
@@ -384,7 +382,7 @@ function updateHeroes(data) {
 					}
 
 					// close the row
-					section += "</tr><tr>";
+					section += "</tr><tr><th>"+ability.type+"</th>";
 				}
 								
 				// update last type
@@ -393,7 +391,14 @@ function updateHeroes(data) {
 			}
 			
 			// ability icon
-			abilityIcon = iconify("ability", ability.name, ability.icon, "*"+ability.name+"*  "+ability.description);
+			tooltip = ability.name.toUpperCase()+": ";
+			if (ability.cooldown != null)
+				tooltip += "Cooldown: "+ability.cooldown+"s. ";
+			if (ability.manaCost != null)
+				tooltip += ability.manaCost+" Mana. ";
+			tooltip += ability.description;
+			
+			abilityIcon = iconify("ability", ability.name, ability.icon, tooltip);
 			section += "<td>"+abilityIcon+"</td>";
 			
 			tally++;
@@ -439,7 +444,7 @@ function updateHeroes(data) {
 			}
 			
 			// talent icon
-			talentIcon = iconify("talent", talent.name, talent.icon, talent.name+"  "+talent.description);
+			talentIcon = iconify("talent", talent.name, talent.icon, talent.name.toUpperCase()+":  "+talent.description);
 			section += "<td>"+talentIcon+"</td>";
 			
 			tally++
@@ -466,8 +471,16 @@ $(function() {
     // listen for incoming broadcast message from our EBS
     twitch.listen('broadcast', function (target, contentType, data) {
         twitch.rig.log('Received broadcast live update');
-        console.log(data);
         updateTables(JSON.parse(data));
+        
+        // notify of reception
+		$.ajax({
+			headers: { 'Authorization': 'Bearer ' + token },
+			type: 'GET',
+			url: 'https://heroesshare.net/twitchext/receive/' + channel,
+			dataType: 'json',
+			error: logError
+		});
     });
 	
 	// pre-load game data to reduce PubSub body message size

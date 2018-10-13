@@ -19,14 +19,12 @@
 			</div>
 			<div id="tuck" class="ui-icon ui-icon-closethick" onclick="$('#main').addClass('tucked');"></div>
 			
-			<table class="panel table-stats" id="table-stats1" onclick="$('.table-stats').hide(); $('#table-stats2').show();"></table>
-			<table class="panel table-stats" id="table-stats2" onclick="$('.table-stats').hide(); $('#table-stats3').show();"></table>
-			<table class="panel table-stats" id="table-stats3" onclick="$('.table-stats').hide(); $('#table-stats1').show();"></table>
+			<table class="panel" id="table-stats"></table>
 			<table class="panel" id="table-talents"></table>
 			<table class="panel" id="table-heroes"></table>
 			
 			<div id="controls">
-				<span onclick="$('.panel').hide(); $('#table-stats1').show();">Stats</span>
+				<span onclick="$('.panel').hide(); $('#table-stats').show();">Stats</span>
 				<span onclick="$('.panel').hide(); $('#table-talents').show();">Talents</span>
 				<span onclick="$('.panel').hide(); $('#table-heroes').show();">Heroes</span>
 			</div>

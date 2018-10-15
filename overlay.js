@@ -59,6 +59,18 @@ function disappear(data) {
 	$('#wrapper').hide();
 }
 
+// enables dynamically-created hero icons to be pushed to show hero card
+function enableHeroButtons() {
+
+	$(".hero-button").click(function() {
+		// figure out hero ID
+		target = $(this).attr("id");
+		target = target.split('-')[1];
+		showHero(target);
+	});
+	
+}
+
 function updateTables(data) {
 	// check for errors
 	if (data.status == "error") {
@@ -142,7 +154,7 @@ function updateStats(data) {
 			tr += "<th class='column-stat'>"+statName+"</th>";
 		} else if (tally == 6) {
 			tr += "<th>";
-			tr += "<select onchange=\"$('.stat-extra').hide(); $('.stat-extra-'+this.value).show();\" >";
+			tr += "<select id='stat-select'>";
 			tr += "<option value='-1'>Hero & mode average:</option>";
 		}
 		
@@ -179,7 +191,7 @@ function updateStats(data) {
 			hero = gameData.heroes[player.heroId];
 			heroIcon = iconify("hero", hero.name, hero.icon);
 
-			tr += "<td class='column-hero' onclick='showHero("+player.heroId+");'>";
+			tr += "<td class='column-hero hero-button' id='stats"+i+"hero-"+player.heroId+"'>";
 			// hero level
 			if (typeof player.heroLevel !== 'undefined' && player.heroLevel !== null) {
 				tr += "<span class='hero-level'>"+player.heroLevel+"</span>";
@@ -222,6 +234,15 @@ function updateStats(data) {
 		// close column and row and add to table
 		tr += "</td></tr>";
 		$('#table-stats').append(tr);
+		
+	});
+	
+	enableHeroButtons();
+	
+	// enable stats dropdown
+	$("#stat-select").change(function() {
+		$(".stat-extra").hide();
+		$(".stat-extra-"+this.value).show();
 	});
 	
 }
@@ -262,7 +283,7 @@ function updateTalents(data) {
 			hero = gameData.heroes[player.heroId];
 			heroIcon = iconify("hero", hero.name, hero.icon);
 
-			tr += "<td class='column-hero' onclick='showHero("+player.heroId+");'>";
+			tr += "<td class='column-hero hero-button' id='talents"+i+"hero-"+player.heroId+"'>";
 			// hero level
 			if (typeof player.heroLevel !== 'undefined' && player.heroLevel !== null) {
 				tr += "<span class='hero-level'>"+player.heroLevel+"</span>";
@@ -312,6 +333,7 @@ function updateTalents(data) {
 		$('#table-talents').append(tr);
 	});
 
+	enableHeroButtons();
 }
 
 function updateHeroes(data) {
@@ -337,7 +359,7 @@ function updateHeroes(data) {
 		// hero icon
 		hero = gameData.heroes[heroId];
 		heroIcon = iconify("hero", hero.name, hero.icon);
-		tr += "<td onclick='showHero("+hero.id+");'>"+heroIcon+"</td>";
+		tr += "<td class='hero-button' id='heroes"+i+"hero-"+hero.id+"'>"+heroIcon+"</td>";
 		
 		tally++;
 	});
@@ -356,7 +378,7 @@ function updateHeroes(data) {
 		hero = gameData.heroes[heroId];
 		
 		section = "<section class='hero' id='hero-"+hero.id+"'>";
-		section += "<div class='close ui-icon ui-icon-closethick' onclick='$(\".hero\").hide();'></div>"
+		section += "<div class='close ui-icon ui-icon-closethick'></div>"
 		
 		// hero icon & name
 		heroIcon = iconify("hero", hero.name, hero.icon);
@@ -464,7 +486,14 @@ function updateHeroes(data) {
 		
 		// add it to the main div
 		$("#main").append(section);
+
 	});
+		
+	// enable close buttons
+	$(".close").click(function() {
+		$(".hero").hide();
+	});
+	enableHeroButtons();
 }
 
 $(function() {
@@ -497,5 +526,26 @@ $(function() {
 		show: false,
 		classes: { "ui-tooltip": "highlight" }
 	});
+
+	// clickbar to toggle display
+	$("#clickbar").click(function() {
+		$("#main").toggleClass('tucked');
+	});
+	// X to hide display
+	$("#tuck").click(function() {
+		$("#main").addClass('tucked');
+	});
+	 
+	// setup buttons
 	$("#controls span").button();
+	$("#controls span").click(function() {
+		
+		// figure out target
+		target = $(this).attr("id");
+		target = target.split('-')[1];
+		$(".panel").hide();
+		$("#table-"+target).show();
+		
+	});
+	
 });

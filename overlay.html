@@ -14,19 +14,19 @@
 		<h1 id="summary">Loading</h1>
 	
 		<div id="main" class="tucked">
-			<div id="clickbar" onclick="$('#main').toggleClass('tucked');">
+			<div id="clickbar">
 				<img id="logo" src="inverse.png" alt="logo" />
 			</div>
-			<div id="tuck" class="ui-icon ui-icon-closethick" onclick="$('#main').addClass('tucked');"></div>
+			<div id="tuck" class="ui-icon ui-icon-closethick"></div>
 			
 			<table class="panel" id="table-stats"></table>
 			<table class="panel" id="table-talents"></table>
 			<table class="panel" id="table-heroes"></table>
 			
 			<div id="controls">
-				<span onclick="$('.panel').hide(); $('#table-stats').show();">Stats</span>
-				<span onclick="$('.panel').hide(); $('#table-talents').show();">Talents</span>
-				<span onclick="$('.panel').hide(); $('#table-heroes').show();">Heroes</span>
+				<span id="button-stats">Stats</span>
+				<span id="button-talents">Talents</span>
+				<span id="button-heroes">Heroes</span>
 			</div>
 		</div>
 	</div>

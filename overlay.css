@@ -93,8 +93,8 @@
 #table-stats, #table-talents {
 	position: absolute;
 	top: 4%;
-	width: 100%;
-	height: 80%;
+	width: 90%;
+	height: 70%;
 	border-collapse: collapse;
 	font-size: 1.5vh;
 }

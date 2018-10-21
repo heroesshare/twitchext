@@ -1,6 +1,6 @@
 var token = "";
 var tuid = "";
-var channel = "223620806";
+var channel = "";
 var ebs = "";
 
 var gameData = [];
@@ -115,7 +115,7 @@ function updateTables(data) {
 	}
 	
 	// if only one endpoint, display the corresponding panel and hide others
-	else if (playerFlag) {
+	else if (playersFlag) {
 		$("#controls").hide();
 		$('.panel').hide();
 		$('#table-stats').show();
@@ -124,7 +124,7 @@ function updateTables(data) {
 	}
 	
 	// if only one endpoint, display the corresponding panel and hide others
-	else if (heroFlag) {
+	else if (heroesFlag) {
 		$("#controls").hide();
 		$('.panel').hide();
 		$('#table-heroes').show();
@@ -501,26 +501,7 @@ $(function() {
     twitch.listen('broadcast', function (target, contentType, data) {
         twitch.rig.log('Received broadcast live update');
         updateTables(JSON.parse(data));
-        
-        // notify of reception
-		$.ajax({
-			headers: { 'Authorization': 'Bearer ' + token },
-			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/receive/' + channel,
-			dataType: 'json',
-			error: logError
-		});
     });
-	
-	// pre-load game data to reduce PubSub body message size
-	$.ajax({
-		headers: { 'Authorization': 'Bearer 123456789' },
-		type: 'GET',
-		url: 'https://heroesshare.net/twitchext/gamedata',
-		dataType: 'json',
-		success: cacheGameData,
-		error: logError
-	});
 
 	$(document).tooltip({
 		show: false,

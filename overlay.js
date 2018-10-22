@@ -18,19 +18,22 @@ twitch.onAuthorized(function(auth) {
 	tuid = auth.userId;
 	channel = auth.channelId;
 	
-	// pre-load game data to reduce PubSub body message size
-	$.ajax({
-		headers: { 'Authorization': 'Bearer ' + token },
-		type: 'GET',
-		url: 'https://heroesshare.net/twitchext/gamedata',
-		dataType: 'json',
-		success: cacheGameData,
-		error: logError
-	});
+	// ensure game data isn't loaded
+	if (gameData.length == 0) {
+		// pre-load game data to reduce PubSub body message size
+		$.ajax({
+			headers: { 'Authorization': 'Bearer ' + token },
+			type: 'GET',
+			url: 'https://heroesshare.net/twitchext/gamedata',
+			dataType: 'json',
+			success: cacheGameData,
+			error: logError
+		});
+	}
 });
 
 function logError(_, error, status) {
-  twitch.rig.log('EBS request returned '+status+' ('+error+')');
+	twitch.rig.log('EBS request returned '+status+' ('+error+')');
 }
 
 function cacheGameData(data) {
@@ -78,8 +81,12 @@ function updateTables(data) {
 		disappear();
 		return;
 	}
-	
-	// make sure there is a game
+	// check for notice ("no games in play")
+	if (data.status == "notice") {
+		disappear();
+		return;
+	}
+	// check for missing game
 	if (typeof data.id == 'undefined' || data.id == null) {
 		twitch.rig.log('No game active, hiding');
 		disappear();

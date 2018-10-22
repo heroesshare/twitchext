@@ -18,30 +18,15 @@ twitch.onAuthorized(function(auth) {
 	tuid = auth.userId;
 	channel = auth.channelId;
 	
-	// check if game data is loaded
-	if (gameData.length == 0) {
-		// pre-load game data to reduce PubSub body message size
-		// will call game fetch when it is done
-		$.ajax({
-			headers: { 'Authorization': 'Bearer ' + token },
-			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/gamedata',
-			dataType: 'json',
-			success: cacheGameData,
-			error: logError
-		});
-		
-	} else {
-		// fetch any live games
-		$.ajax({
-			headers: { 'Authorization': 'Bearer ' + token },
-			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/fetch/' + channel,
-			dataType: 'json',
-			success: updateTables,
-			error: logError
-		});
-	}
+	// fetch any live games
+	$.ajax({
+		headers: { 'Authorization': 'Bearer ' + token },
+		type: 'GET',
+		url: 'https://heroesshare.net/twitchext/fetch/' + channel,
+		dataType: 'json',
+		success: updateTables,
+		error: logError
+	});
 });
 
 function logError(_, error, status) {
@@ -52,7 +37,7 @@ function cacheGameData(data) {
 	if (data.status == "success") {
 		gameData = data.gameData;
 
-		// initial fetch of any live games
+		// fetch of any live games
 		$.ajax({
 			headers: { 'Authorization': 'Bearer ' + token },
 			type: 'GET',
@@ -102,6 +87,21 @@ function updateTables(data) {
 	if (typeof data.id == 'undefined' || data.id == null) {
 		twitch.rig.log('No game active, hiding');
 		disappear();
+		return;
+	}
+	
+	// we have a game! make sure game data is loaded
+	if (gameData.length == 0) {
+		// load game data and quit (will re-fetch live game when done)
+		$.ajax({
+			headers: { 'Authorization': 'Bearer ' + token },
+			type: 'GET',
+			url: 'https://heroesshare.net/twitchext/gamedata',
+			dataType: 'json',
+			success: cacheGameData,
+			error: logError
+		});
+		
 		return;
 	}
 	

@@ -18,15 +18,27 @@ twitch.onAuthorized(function(auth) {
 	tuid = auth.userId;
 	channel = auth.channelId;
 	
-	// ensure game data isn't loaded
+	// check if game data is loaded
 	if (gameData.length == 0) {
 		// pre-load game data to reduce PubSub body message size
+		// will call game fetch when it is done
 		$.ajax({
 			headers: { 'Authorization': 'Bearer ' + token },
 			type: 'GET',
 			url: 'https://heroesshare.net/twitchext/gamedata',
 			dataType: 'json',
 			success: cacheGameData,
+			error: logError
+		});
+		
+	} else {
+		// fetch any live games
+		$.ajax({
+			headers: { 'Authorization': 'Bearer ' + token },
+			type: 'GET',
+			url: 'https://heroesshare.net/twitchext/fetch/' + channel,
+			dataType: 'json',
+			success: updateTables,
 			error: logError
 		});
 	}

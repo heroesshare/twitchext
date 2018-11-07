@@ -22,7 +22,7 @@
 }
 	#main.tucked {
 		right: calc(-28% + 10px);
-		opacity: 0.3;
+		opacity: 0.5;
 	}
 
 	#clickbar {
@@ -213,12 +213,16 @@
 		cursor: pointer;
 	}
 	
+	.hero h2 {
+		float: right;
+	}
+	
 	.hero .icon-hero {
 		max-height: 10vh;
 		float: right;
 	}
 	.hero .icon-talent {
-		max-height: 3vh;
+		max-height: 2.7vh;
 	}
 	
 .wrapper-abilities {

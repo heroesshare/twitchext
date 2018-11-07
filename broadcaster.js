@@ -33,7 +33,7 @@ $(function() {
 		$.ajax({
 			headers: { 'Authorization': 'Bearer ' + token },
 			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/receive/' + channel,
+			url: 'https://heroesshare.net/twitches/receive',
 			dataType: 'json',
 			error: logError
 		});

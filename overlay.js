@@ -22,7 +22,7 @@ twitch.onAuthorized(function(auth) {
 	$.ajax({
 		headers: { 'Authorization': 'Bearer ' + token },
 		type: 'GET',
-		url: 'https://heroesshare.net/twitchext/fetch/' + channel,
+		url: 'https://heroesshare.net/twitches/fetch',
 		dataType: 'json',
 		success: updateTables,
 		error: logError
@@ -41,7 +41,7 @@ function cacheGameData(data) {
 		$.ajax({
 			headers: { 'Authorization': 'Bearer ' + token },
 			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/fetch/' + channel,
+			url: 'https://heroesshare.net/twitches/fetch',
 			dataType: 'json',
 			success: updateTables,
 			error: logError
@@ -96,7 +96,7 @@ function updateTables(data) {
 		$.ajax({
 			headers: { 'Authorization': 'Bearer ' + token },
 			type: 'GET',
-			url: 'https://heroesshare.net/twitchext/gamedata',
+			url: 'https://heroesshare.net/twitches/gamedata',
 			dataType: 'json',
 			success: cacheGameData,
 			error: logError
@@ -139,6 +139,7 @@ function updateTables(data) {
 		$('.panel').hide();
 		$('#table-stats').show();
 		
+		updateStats(data);
 		$("#main").show();
 	}
 	
@@ -148,6 +149,7 @@ function updateTables(data) {
 		$('.panel').hide();
 		$('#table-heroes').show();
 		
+		updateHeroes(data);
 		$("#main").show();
 	}
 	

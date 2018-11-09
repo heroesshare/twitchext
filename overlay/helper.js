@@ -18,7 +18,6 @@ var twitch = window.Twitch.ext;
 
 // update status based on current game
 twitch.onContext(function(context) {
-	addLog(context);
 	playing = context.game;
 });
 

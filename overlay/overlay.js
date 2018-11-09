@@ -564,7 +564,11 @@ $(function() {
 	
 	// make the display more obvious when extension icon is hovered
 	twitch.onHighlightChanged(function(hovered) {
-		if (hovered) { alert("hi"); } else { alert("bye"); }
+		if (hovered) {
+			addLog("Extension icon hovered");
+		} else {
+			addLog("Extension icon left");
+		}
 	});
 	
 	// enable JQueryUI tooltips

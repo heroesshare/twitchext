@@ -32,6 +32,9 @@
 		right: calc(-28% + 10px);
 		opacity: 0.5;
 	}
+	#main.highlight {
+		opacity: 1 !important;
+	}
 
 	#clickbar {
 		position: absolute;
@@ -224,6 +227,7 @@
 	
 	.hero h2 {
 		float: right;
+		margin-left: 20px;
 	}
 	.hero h2, .hero h3 {
 		font-size: 2.6vh;

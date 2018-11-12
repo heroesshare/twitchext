@@ -23,27 +23,26 @@ twitch.onContext(function(context) {
 
 // update credentials when a new JWT token is issued
 twitch.onAuthorized(function(auth) {
-	addLog(auth);
 
 	token = auth.token;
 	tuid = auth.userId;
 	channel = auth.channelId;
 	
-	$('#status').append("Connection established, waiting for game\n");
+	if (! enabled) {
+		addLog("Disabled");
+		return false;
+	}
+	
+	if (initialized) {
+		addLog("Re-authorized. Waiting for game...");
+	} else {
+		addLog("Connection established, checking for game...");
+		fetchGame();
+	}
+	
 });
 
 // generic handler for AJAX failures
 function logError(_, error, status) {
-  addLog("EBS request returned "+status+" ("+error+")");
+	addLog("EBS request returned "+status+" ("+error+")");
 }
-
-// development = log to console
-// production = do nothing
-function addLog(data) {
-	console.log(data);
-}
-
-
-$(function() {
-	$('#status').append("\nConnecting to EBS...\n");
-});

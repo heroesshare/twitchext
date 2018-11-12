@@ -1,6 +1,16 @@
+// update status line
+// development: also log to console
+function addLog(data) {
+	console.log(data);
+	
+	if (typeof data == 'array') {
+		data = data.toString();
+	}
+	$('#status').append(data+"\n");
+}
 
 function logError(_, error, status) {
-	addLog('EBS request returned '+status+' ('+error+')');
+	addLog("EBS request returned "+status+" ("+error+")");
 }
 
 // initial fetch of any live games
@@ -35,7 +45,7 @@ function cacheGameData() {
 		},
 		error: function(data) {
 			initialized = false;
-			addLog('Failed to load game data');
+			addLog("Failed to load game data");
 			disappear();
 		},
 	});
@@ -567,12 +577,14 @@ $(function() {
         processGame(JSON.parse(data));
     });
 	
-	// make the display more obvious when extension icon is hovered
+	// show status when extension icon is hovered
 	twitch.onHighlightChanged(function(hovered) {
 		if (hovered) {
 			$("#status").show();
+			$("#main").addClass("highlight");
 		} else {
 			$("#status").hide();
+			$("#main").removeClass("highlight");
 		}
 	});
 	
@@ -605,4 +617,5 @@ $(function() {
 		
 	});
 	
+	addLog("Connecting to EBS...");
 });

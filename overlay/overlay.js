@@ -529,19 +529,24 @@ function iconify(target, name, file, tooltip) {
 	// start building the tag
 	img = '<img class="icon icon-'+target+'" src="';
 	
-	if (target == "hero") {
-		imgSrc = "heroes/"+file;
-	} else if (target == "ability") {
-		imgSrc = "talents/"+file;
-	} else {
-		imgSrc = "talents/"+file;
+	// check for local version
+	if (manifest.indexOf(file)==-1) {
+		img += remoteIconsDir;
 	}
-	img += imgSrc+'" alt="'+imgSrc+'"';
 	
+	if (target == "hero") {
+		img += "heroes/"+file;
+	} else if (target == "ability") {
+		img += "talents/"+file;
+	} else {
+		img += "talents/"+file;
+	}
+	img += '" alt="'+name+'"';
+		
 	if (tooltip) {
 		img += ' title="'+tooltip+'"';
 	}
-	img += " onerror=\"$(this).src='"+remoteIconsDir+"'+$(this).attr('alt');\" />";
+	img += " />";
 	
 	return img;
 }
@@ -565,9 +570,9 @@ $(function() {
 	// make the display more obvious when extension icon is hovered
 	twitch.onHighlightChanged(function(hovered) {
 		if (hovered) {
-			addLog("Extension icon hovered");
+			$("#status").show();
 		} else {
-			addLog("Extension icon left");
+			$("#status").hide();
 		}
 	});
 	

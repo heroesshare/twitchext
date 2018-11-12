@@ -6,7 +6,7 @@ function addLog(data) {
 	if (typeof data == 'array') {
 		data = data.toString();
 	}
-	$('#status').append(data+"\n");
+	$('#status').html(data);
 }
 
 function logError(_, error, status) {
@@ -75,7 +75,7 @@ function enableHeroButtons() {
 // receives AJAX response data and figures out state
 function processGame(data) {
 	// log any response
-	if (data.messsage) {
+	if (data.message) {
 		addLog(data.status+": "+data.message)
 	}
 	

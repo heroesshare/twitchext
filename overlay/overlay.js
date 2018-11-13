@@ -1,7 +1,6 @@
 // update status line
 // development: also log to console
 function addLog(data) {
-	console.log(data);
 	
 	if (typeof data == 'array') {
 		data = data.toString();

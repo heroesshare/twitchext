@@ -33,7 +33,9 @@ twitch.onAuthorized(function(auth) {
 		return false;
 	}
 	
-	if (initialized) {
+	if (currentGame) {
+		addLog("Re-authorized. Game in play: "+currentGame);
+	} else if (initialized) {
 		addLog("Re-authorized. Waiting for game...");
 	} else {
 		addLog("Connection established, checking for game...");

@@ -1,5 +1,137 @@
 
-	
+	// send updated live game info to PubSub for extension broadcast
+	public function broadcast($stream_id, $live_id) {
+		$this->load->model("Stream");
+		
+		$stream = $this->Stream->get($stream_id);
+		$channel = $this->Stream->channel($stream_id);
+		$players = $this->Stream->players($stream_id);
+
+		log_message("debug","Twitch->Broadcast() :: Delivering live JSON to channel ".$channel);
+		
+		// check for certified owner
+		$user_id = $this->Stream->user($stream_id);
+				
+		// make sure the game is still live
+		$this->load->model("Live");
+		$live = $this->Live->get($live_id);
+		if ($live['status']=="Complete"):
+			$output = array(
+				"status" => "notice",
+				"message" => "No games in play"
+			);
+
+		// try to generate array from live game		
+		else:
+			$output = $this->Live->json($live_id, $stream_id);
+		
+			// if something went wrong log the error but continue
+			if ($output['status']!="success"):
+				log_message("error", "Twitch->Broadcast() :: Error retrieving JSON for live #".$live_id." for channel ".$channel.": ".$output['message']);
+			endif;
+		endif;
+
+		$message = $output['message'];
+		$output = json_encode($output);
+		
+		// load config values
+		$this->config->load("twitch");
+		$client_id = $this->config->item("overlay_client_id");
+		$secret = $this->config->item("overlay_secret_key");
+		$owner_id = $this->config->item("overlay_owner_id");
+		
+		// build the URL
+		$url = "https://api.twitch.tv/extensions/message/".$stream['channel_id'];
+		
+		// create and sign the JWT
+		$payload = array(
+			'exp' => time()+60*60,
+			'channel_id' => (string)$stream['channel_id'],
+			'role' => "external",
+			'pubsub_perms' => array('send'=>array("broadcast"))
+		);
+		$jwt = JWT::encode($payload, $secret, 'HS256');
+		
+		// build the headers
+		$headers = array(
+			"Client-Id: ".$client_id,
+			"Content-Type: application/json",
+			"Authorization: Bearer ".$jwt
+		);
+		
+		// build the body
+		$body = array(
+			"content_type" => "application/json",
+			"message" => $output,
+			"targets" => array("broadcast")
+		);
+		$body = json_encode($body);
+		
+		// setup cURL
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_ENCODING, "gzip");
+		$result = curl_exec($ch);
+		curl_close($ch);
+		
+		// start the log
+		$log = array(
+			"type" => "broadcast",
+			"channel_id" => $stream['channel_id'],
+			"stream_id" => $stream['id'],
+			"channel" => $stream['channel'],
+			"live_id" => $live_id
+		);
+		
+		if (!empty($result)):
+			// check for JSON response (error)
+			$test = json_decode($result, TRUE);
+			
+			// if json_decode failed then it's a JWT
+			if (is_null($test)):
+				// decode the response
+				$response = $this->Twitch->jwt_decode($result);
+
+				$message = print_r($response, TRUE);
+				$message = str_replace(array("    ","\n"), " ", $message);
+				log_message("error","Twitch->Broadcast() :: ".$message);
+				
+				$log['status'] = "Error";
+				$log['message'] = $message;
+				
+			// json_decode failed - likely an error message
+			else:
+				$message = "Invalid response from PubSub: ";
+				if (!empty($test['error'])):
+					$message .= $test['error'].". ";
+				endif;
+				if (!empty($test['message'])):
+					$message .= $test['message'].". ";
+				endif;
+				
+				log_message("error", "Twitch->Broadcast() :: ".$message);
+				$log['status'] = "Error";
+				$log['message'] = $message;
+			endif;
+		else:
+			$log['status'] = "Success";
+			$log['message'] = $message;
+		endif;
+		
+		// update the last extension activity timestamp
+		$this->db->where("stream_id", $stream_id);
+		$this->db->limit(1);
+		$this->db->update("overlays", array("activity" => date("Y-m-d H:i:s")));
+		
+		// add log entry
+		$this->db->insert("overlay_logs", $log);
+		log_message("debug", "Twitch->Broadcast() :: Sent broadcast for live #".$live_id." for channel ".$channel);
+	}
+
 	// output abilities and talents in JSON for Twitch extension cache
 	public function gamedata() {
 		header('Access-Control-Allow-Origin: *');
